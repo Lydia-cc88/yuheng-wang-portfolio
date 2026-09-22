@@ -52,7 +52,7 @@ const projectMediaSystems = {
   ]
 };
 
-const assetVersion = "20260922-3";
+const assetVersion = "20260922-4";
 const versionedAsset = (src) => src ? `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}` : src;
 
 const projectMediaContent = {
@@ -1172,6 +1172,10 @@ function initSignalIntro() {
 
 function startSignalIntro() {
   if (!body.classList.contains("signal-awaiting")) return false;
+  if (homeBackgroundVideo) {
+    homeBackgroundVideo.load();
+    resumeHomeBackgroundVideo();
+  }
   signalLocked = true;
   body.classList.remove("signal-awaiting", "signal-core-fired");
   body.classList.add("signal-enter");
