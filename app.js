@@ -52,6 +52,9 @@ const projectMediaSystems = {
   ]
 };
 
+const assetVersion = "20260922-2";
+const versionedAsset = (src) => src ? `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}` : src;
+
 const projectMediaContent = {
   "digital-01": [
     { title: "Campaign Film", description: "Full promotional film", ratio: "16:9", layout: "wide", type: "video", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-campaign-film.mp4", controls: true, preload: "metadata" },
@@ -257,7 +260,7 @@ const collectionCovers = {
 document.querySelector("#collection-list").innerHTML = projects.map((project, index) => {
   const media = projectMediaContent[project.id];
   const cover = collectionCovers[project.id] || media.find(item => item.poster)?.poster || media.find(item => item.type === "image")?.src;
-  return `<button class="collection-card" type="button" data-project="${project.id}" style="--float-delay:${index * -.83}s;--work-accent:${project.colors[0]}"><span class="collection-mark"><img src="${project.icon}" alt="" loading="lazy"></span><span class="collection-cover"><img src="${cover}" alt="${project.name} project cover" loading="lazy"></span><span class="collection-caption"><span><small>${String(index + 1).padStart(2, "0")} / ${project.category}</small><strong class="refraction-title" aria-label="${project.name}">${refractiveTextMarkup(project.name)}</strong></span></span></button>`;
+  return `<button class="collection-card" type="button" data-project="${project.id}" style="--float-delay:${index * -.83}s;--work-accent:${project.colors[0]}"><span class="collection-mark"><img src="${versionedAsset(project.icon)}" alt="" loading="lazy"></span><span class="collection-cover"><img src="${versionedAsset(cover)}" alt="${project.name} project cover" loading="lazy"></span><span class="collection-caption"><span><small>${String(index + 1).padStart(2, "0")} / ${project.category}</small><strong class="refraction-title" aria-label="${project.name}">${refractiveTextMarkup(project.name)}</strong></span></span></button>`;
 }).join("");
 function setCollection(open, immediate = false) {
   if (open && body.classList.contains("overlay-open")) return;
@@ -1626,7 +1629,7 @@ function styleObjects(project, nextProject) {
   object.classList.toggle("project-object--image", Boolean(project.icon));
   const nextVisualIcon = project.upNextIcon || nextProject.icon;
   nextObject.classList.toggle("project-object--image", Boolean(nextVisualIcon));
-  if (project.icon) object.style.setProperty("--project-icon", `url("${project.icon}")`);
+  if (project.icon) object.style.setProperty("--project-icon", `url("${versionedAsset(project.icon)}")`);
   else object.style.removeProperty("--project-icon");
   if (nextVisualIcon) nextObject.style.setProperty("--project-icon", `url("${nextVisualIcon}")`);
   else nextObject.style.removeProperty("--project-icon");
@@ -1656,8 +1659,8 @@ function syncProjectIconMarkup(object, project, includeFill = false) {
   object.classList.remove("project-object--home");
   object.classList.toggle("project-object--image", Boolean(project.icon));
   if (project.icon) {
-    object.style.setProperty("--project-icon", `url("${project.icon}")`);
-    object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<img class="project-object__image" src="${project.icon}" alt="" aria-hidden="true">`;
+    object.style.setProperty("--project-icon", `url("${versionedAsset(project.icon)}")`);
+    object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<img class="project-object__image" src="${versionedAsset(project.icon)}" alt="" aria-hidden="true">`;
   } else {
     object.style.removeProperty("--project-icon");
     object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<i></i><i></i><i></i>`;
@@ -1668,7 +1671,7 @@ function syncHomeReturnMarkup(object, includeFill = false) {
   object.classList.remove("project-object--image");
   object.classList.add("project-object--home");
   object.style.removeProperty("--project-icon");
-  object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<span class="home-return-icon" aria-hidden="true"><img src="${homeReturnProject.icon}" alt=""></span>`;
+  object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<span class="home-return-icon" aria-hidden="true"><img src="${versionedAsset(homeReturnProject.icon)}" alt=""></span>`;
 }
 
 function splitHeroTitle() {
@@ -1692,15 +1695,15 @@ function renderMediaElement(item) {
       item.autoplay ? "data-autoplay=\"true\"" : "",
       item.poster ? `poster=\"${item.poster}\"` : ""
     ].filter(Boolean).join(" ");
-    return `<video ${attributes}><source src="${item.src}" type="video/mp4">Your browser does not support HTML video.</video>`;
+    return `<video ${attributes}><source src="${versionedAsset(item.src)}" type="video/mp4">Your browser does not support HTML video.</video>`;
   }
   if (item.type === "gallery") {
     return `<div class="project-media-asset-grid project-media-asset-grid--${item.variant || "default"}">
-      ${item.items.map((asset) => `<img src="${asset.src}" alt="${asset.alt || item.title}" loading="lazy" decoding="async">`).join("")}
+      ${item.items.map((asset) => `<img src="${versionedAsset(asset.src)}" alt="${asset.alt || item.title}" loading="lazy" decoding="async">`).join("")}
     </div>`;
   }
   const imageStyle = [item.fit ? `object-fit:${item.fit}` : "", item.position ? `object-position:${item.position}` : ""].filter(Boolean).join(";");
-  return `<img src="${item.src}" alt="${item.alt || item.title}" loading="lazy" decoding="async"${imageStyle ? ` style="${imageStyle}"` : ""}>`;
+  return `<img src="${versionedAsset(item.src)}" alt="${item.alt || item.title}" loading="lazy" decoding="async"${imageStyle ? ` style="${imageStyle}"` : ""}>`;
 }
 
 function renderProjectMedia(project) {
