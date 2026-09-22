@@ -52,7 +52,7 @@ const projectMediaSystems = {
   ]
 };
 
-const assetVersion = "20260922-2";
+const assetVersion = "20260922-3";
 const versionedAsset = (src) => src ? `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}` : src;
 
 const projectMediaContent = {
