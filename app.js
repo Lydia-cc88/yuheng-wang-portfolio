@@ -52,8 +52,11 @@ const projectMediaSystems = {
   ]
 };
 
-const assetVersion = "20260923-1";
-const versionedAsset = (src) => src ? `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}` : src;
+const assetVersion = "20260923-2";
+const versionedAsset = (src) => {
+  if (!src || location.protocol === "file:") return src;
+  return `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}`;
+};
 
 const projectMediaContent = {
   "digital-01": [
@@ -269,6 +272,10 @@ const collectionIcons = {
   "microscopic-world": "assets/thumbs/microscopic-world.png",
   "shoots": "assets/thumbs/shoots.png"
 };
+// The detail hero uses compact, self-hosted versions first.  The original asset
+// remains in every project and is still used for the case-study content.
+const detailProjectIcons = collectionIcons;
+const projectIconFallbacks = collectionCovers;
 document.querySelector("#collection-list").innerHTML = projects.map((project, index) => {
   const media = projectMediaContent[project.id];
   const cover = collectionCovers[project.id] || media.find(item => item.poster)?.poster || media.find(item => item.type === "image")?.src;
@@ -1456,7 +1463,7 @@ function resizeInfoBackground() {
 }
 
 function selectInfoBackgroundIcon() {
-  const iconChoices = projects.map((project) => project.icon).filter(Boolean);
+  const iconChoices = projects.map((project) => detailProjectIcons[project.id] || project.icon).filter(Boolean);
   const source = iconChoices[Math.floor(Math.random() * iconChoices.length)];
   const image = new Image();
   image.decoding = "async";
@@ -1639,14 +1646,16 @@ function showInfo(push = true) {
 function styleObjects(project, nextProject) {
   const object = document.querySelector("#detail-object");
   const nextObject = document.querySelector("#next-object");
+  const detailIcon = detailProjectIcons[project.id] || project.icon;
+  const nextDetailIcon = detailProjectIcons[nextProject.id] || nextProject.icon;
   object.style.setProperty("--object-accent", project.colors[0]);
   object.style.setProperty("--object-base", project.colors[1]);
   nextObject.style.setProperty("--object-accent", nextProject.colors[0]);
   nextObject.style.setProperty("--object-base", nextProject.colors[1]);
-  object.classList.toggle("project-object--image", Boolean(project.icon));
-  const nextVisualIcon = project.upNextIcon || nextProject.icon;
+  object.classList.toggle("project-object--image", Boolean(detailIcon));
+  const nextVisualIcon = project.upNextIcon || nextDetailIcon;
   nextObject.classList.toggle("project-object--image", Boolean(nextVisualIcon));
-  if (project.icon) object.style.setProperty("--project-icon", `url("${versionedAsset(project.icon)}")`);
+  if (detailIcon) object.style.setProperty("--project-icon", `url("${versionedAsset(detailIcon)}")`);
   else object.style.removeProperty("--project-icon");
   if (nextVisualIcon) nextObject.style.setProperty("--project-icon", `url("${nextVisualIcon}")`);
   else nextObject.style.removeProperty("--project-icon");
@@ -1673,11 +1682,33 @@ function createNextObject() {
 }
 
 function syncProjectIconMarkup(object, project, includeFill = false) {
+  const icon = detailProjectIcons[project.id] || project.icon;
+  const fallback = projectIconFallbacks[project.id];
+  const renderToken = `${project.id}-${performance.now()}`;
   object.classList.remove("project-object--home");
-  object.classList.toggle("project-object--image", Boolean(project.icon));
-  if (project.icon) {
-    object.style.setProperty("--project-icon", `url("${versionedAsset(project.icon)}")`);
-    object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<img class="project-object__image" src="${versionedAsset(project.icon)}" alt="" aria-hidden="true">`;
+  object.dataset.iconToken = renderToken;
+  object.classList.toggle("project-object--image", Boolean(icon));
+  if (icon) {
+    object.style.setProperty("--project-icon", `url("${versionedAsset(icon)}")`);
+    object.innerHTML = includeFill ? '<span class="next-icon-fill"></span>' : "";
+    const image = document.createElement("img");
+    image.className = "project-object__image";
+    image.alt = "";
+    image.setAttribute("aria-hidden", "true");
+    image.decoding = "async";
+    image.addEventListener("error", () => {
+      if (object.dataset.iconToken !== renderToken) return;
+      if (fallback && image.dataset.fallbackUsed !== "true") {
+        image.dataset.fallbackUsed = "true";
+        image.src = versionedAsset(fallback);
+        return;
+      }
+      object.classList.remove("project-object--image");
+      object.style.removeProperty("--project-icon");
+      object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<i></i><i></i><i></i>`;
+    });
+    object.append(image);
+    image.src = versionedAsset(icon);
   } else {
     object.style.removeProperty("--project-icon");
     object.innerHTML = `${includeFill ? '<span class="next-icon-fill"></span>' : ""}<i></i><i></i><i></i>`;
