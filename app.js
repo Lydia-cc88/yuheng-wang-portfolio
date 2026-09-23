@@ -52,7 +52,7 @@ const projectMediaSystems = {
   ]
 };
 
-const assetVersion = "20260923-2";
+const assetVersion = "20260923-3";
 const versionedAsset = (src) => {
   if (!src || location.protocol === "file:") return src;
   return `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}`;
@@ -275,7 +275,9 @@ const collectionIcons = {
 // The detail hero uses compact, self-hosted versions first.  The original asset
 // remains in every project and is still used for the case-study content.
 const detailProjectIcons = collectionIcons;
-const projectIconFallbacks = collectionCovers;
+// A failed compact icon retries the original project mark.  Covers are never
+// used here: the central detail object must always remain the project's mark.
+const projectIconFallbacks = Object.fromEntries(projects.map((project) => [project.id, project.icon]));
 document.querySelector("#collection-list").innerHTML = projects.map((project, index) => {
   const media = projectMediaContent[project.id];
   const cover = collectionCovers[project.id] || media.find(item => item.poster)?.poster || media.find(item => item.type === "image")?.src;
