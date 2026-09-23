@@ -52,7 +52,7 @@ const projectMediaSystems = {
   ]
 };
 
-const assetVersion = "20260922-4";
+const assetVersion = "20260923-1";
 const versionedAsset = (src) => src ? `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}` : src;
 
 const projectMediaContent = {
@@ -250,17 +250,30 @@ let collectionLockedUntil = 0;
 let collectionWheelTotal = 0;
 let collectionWheelTimer;
 const collectionCovers = {
+  "digital-01": "collection-media/tuborg-ringbeats-cover-thumb.jpg",
   "digital-02": "cube-media/museum.webp",
   "digital-03": "cube-media/library.webp",
-  "digital-04": "collection-media/melotrip-cover.jpg",
-  "welcome-exe": "collection-media/welcome-cover-v2.jpg",
-  "microscopic-world": "collection-media/microscopic-cover.png",
-  "shoots": "collection-media/shoots-cover.png"
+  "digital-04": "collection-media/melotrip-cover-thumb.jpg",
+  "gold-rush": "collection-media/gold-rush-cover-thumb.jpg",
+  "welcome-exe": "collection-media/welcome-exe-cover-thumb.jpg",
+  "microscopic-world": "collection-media/microscopic-world-cover-thumb.jpg",
+  "shoots": "collection-media/shoots-cover-thumb.jpg"
+};
+const collectionIcons = {
+  "digital-01": "assets/thumbs/digital-01.png",
+  "digital-02": "assets/thumbs/digital-02.png",
+  "digital-03": "assets/thumbs/digital-03.png",
+  "digital-04": "assets/thumbs/digital-04.png",
+  "gold-rush": "assets/thumbs/gold-rush.png",
+  "welcome-exe": "assets/thumbs/welcome-exe.png",
+  "microscopic-world": "assets/thumbs/microscopic-world.png",
+  "shoots": "assets/thumbs/shoots.png"
 };
 document.querySelector("#collection-list").innerHTML = projects.map((project, index) => {
   const media = projectMediaContent[project.id];
   const cover = collectionCovers[project.id] || media.find(item => item.poster)?.poster || media.find(item => item.type === "image")?.src;
-  return `<button class="collection-card" type="button" data-project="${project.id}" style="--float-delay:${index * -.83}s;--work-accent:${project.colors[0]}"><span class="collection-mark"><img src="${versionedAsset(project.icon)}" alt="" loading="lazy"></span><span class="collection-cover"><img src="${versionedAsset(cover)}" alt="${project.name} project cover" loading="lazy"></span><span class="collection-caption"><span><small>${String(index + 1).padStart(2, "0")} / ${project.category}</small><strong class="refraction-title" aria-label="${project.name}">${refractiveTextMarkup(project.name)}</strong></span></span></button>`;
+  const icon = collectionIcons[project.id] || project.icon;
+  return `<button class="collection-card" type="button" data-project="${project.id}" style="--float-delay:${index * -.83}s;--work-accent:${project.colors[0]}"><span class="collection-mark"><img src="${versionedAsset(icon)}" alt="" loading="lazy" decoding="async"></span><span class="collection-cover"><img src="${versionedAsset(cover)}" alt="${project.name} project cover" loading="lazy" decoding="async"></span><span class="collection-caption"><span><small>${String(index + 1).padStart(2, "0")} / ${project.category}</small><strong class="refraction-title" aria-label="${project.name}">${refractiveTextMarkup(project.name)}</strong></span></span></button>`;
 }).join("");
 function setCollection(open, immediate = false) {
   if (open && body.classList.contains("overlay-open")) return;
