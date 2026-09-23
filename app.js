@@ -52,7 +52,7 @@ const projectMediaSystems = {
   ]
 };
 
-const assetVersion = "20260923-3";
+const assetVersion = "20260924-1";
 const versionedAsset = (src) => {
   if (!src || location.protocol === "file:") return src;
   return `${src}${src.includes("?") ? "&" : "?"}v=${assetVersion}`;
@@ -62,7 +62,7 @@ const projectMediaContent = {
   "digital-01": [
     { title: "Campaign Film", description: "Full promotional film", ratio: "16:9", layout: "wide", type: "video", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-campaign-film.mp4", controls: true, preload: "metadata" },
     { title: "Master Cover", description: "Project concept and campaign overview", ratio: "16:9", layout: "wide", type: "image", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-cover.jpg", alt: "Tuborg Ringbeats campaign cover explaining the insight, idea and execution" },
-    { title: "Motion Detail", description: "Short campaign motion study", ratio: "16:9", layout: "half-left", type: "video", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-motion-detail.mp4", muted: true, loop: true, autoplay: true },
+    { title: "Motion Detail", description: "Short campaign motion study", ratio: "16:9", layout: "half-left", type: "video", src: "static-media/tuborg-ringbeats-motion-detail.mp4", muted: true, loop: true, autoplay: true },
     { title: "Web Experience", description: "Upload, remix and community interaction flow", ratio: "16:9", layout: "half-right", type: "image", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-web-experience.jpg", alt: "Tuborg Ringbeats website experience and interaction flow" },
     { title: "Shared Release", description: "Campaign atmosphere and social ritual", ratio: "16:9", layout: "feature", type: "image", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-celebration.jpg", alt: "Two people celebrating with Tuborg bottles under coloured lights" },
     { title: "Outdoor Poster", description: "Ringbeats campaign shown in the city", ratio: "Cropped", layout: "detail", type: "image", src: "assets/projects/tuborg-ringbeats/tuborg-ringbeats-outdoor-poster.jpg", alt: "Tuborg Ringbeats outdoor poster at a night bus shelter", position: "50% 48%" },
@@ -263,20 +263,17 @@ const collectionCovers = {
   "shoots": "collection-media/shoots-cover-thumb.jpg"
 };
 const collectionIcons = {
-  "digital-01": "assets/thumbs/digital-01.png",
-  "digital-02": "assets/thumbs/digital-02.png",
-  "digital-03": "assets/thumbs/digital-03.png",
-  "digital-04": "assets/thumbs/digital-04.png",
-  "gold-rush": "assets/thumbs/gold-rush.png",
-  "welcome-exe": "assets/thumbs/welcome-exe.png",
-  "microscopic-world": "assets/thumbs/microscopic-world.png",
-  "shoots": "assets/thumbs/shoots.png"
+  "digital-01": "static-media/project-icons/digital-01.png",
+  "digital-02": "static-media/project-icons/digital-02.png",
+  "digital-03": "static-media/project-icons/digital-03.png",
+  "digital-04": "static-media/project-icons/digital-04.png",
+  "gold-rush": "static-media/project-icons/gold-rush.png",
+  "welcome-exe": "static-media/project-icons/welcome-exe.png",
+  "microscopic-world": "static-media/project-icons/microscopic-world.png",
+  "shoots": "static-media/project-icons/shoots.png"
 };
-// The detail hero uses compact, self-hosted versions first.  The original asset
-// remains in every project and is still used for the case-study content.
+// Use the same compact project marks in local previews and on GitHub Pages.
 const detailProjectIcons = collectionIcons;
-// A failed compact icon retries the original project mark.  Covers are never
-// used here: the central detail object must always remain the project's mark.
 const projectIconFallbacks = Object.fromEntries(projects.map((project) => [project.id, project.icon]));
 document.querySelector("#collection-list").innerHTML = projects.map((project, index) => {
   const media = projectMediaContent[project.id];
