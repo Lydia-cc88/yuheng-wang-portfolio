@@ -590,7 +590,6 @@ let infoGlitchTimer;
 let infoBackgroundFrame = 0;
 let infoBackgroundLastTime = 0;
 let infoBackgroundRotation = 0;
-let infoBackgroundImage = null;
 let infoBayerPattern = null;
 let activeSignal = -1;
 let forcedSignal = -1;
@@ -1462,81 +1461,131 @@ function resizeInfoBackground() {
   infoBayerPattern = infoBackgroundContext.createPattern(patternCanvas, "repeat");
 }
 
-function selectInfoBackgroundIcon() {
-  const iconChoices = projects.map((project) => detailProjectIcons[project.id] || project.icon).filter(Boolean);
-  const source = iconChoices[Math.floor(Math.random() * iconChoices.length)];
-  const image = new Image();
-  image.decoding = "async";
-  image.onload = () => { infoBackgroundImage = image; };
-  image.src = source;
+const infoTorusMesh = (() => {
+  const longitudinal = 88;
+  const radial = 24;
+  const vertices = [];
+  const faces = [];
+  for (let ring = 0; ring <= longitudinal; ring++) {
+    const u = ring / longitudinal * Math.PI * 2;
+    const major = 1.05 + .035 * Math.sin(u * 3);
+    for (let segment = 0; segment <= radial; segment++) {
+      const v = segment / radial * Math.PI * 2;
+      const tube = .51 + .026 * Math.cos(u * 6 + v * 2);
+      vertices.push({
+        x: (major + tube * Math.cos(v)) * Math.cos(u),
+        y: (major + tube * Math.cos(v)) * Math.sin(u),
+        z: tube * Math.sin(v)
+      });
+    }
+  }
+  for (let ring = 0; ring < longitudinal; ring++) {
+    for (let segment = 0; segment < radial; segment++) {
+      const index = ring * (radial + 1) + segment;
+      faces.push({
+        corners: [index, index + radial + 1, index + radial + 2, index + 1],
+        u: (ring + .5) / longitudinal * Math.PI * 2,
+        v: (segment + .5) / radial * Math.PI * 2,
+        depth: 0
+      });
+    }
+  }
+  return { vertices, faces };
+})();
+
+function drawInfoChromeOrb(ctx, centerX, centerY, radius) {
+  const orbRadius = radius * .42;
+  const surface = ctx.createRadialGradient(
+    centerX - orbRadius * .33, centerY - orbRadius * .42, orbRadius * .04,
+    centerX, centerY, orbRadius
+  );
+  surface.addColorStop(0, "#9fa9ae");
+  surface.addColorStop(.23, "#414d55");
+  surface.addColorStop(.54, "#1a252b");
+  surface.addColorStop(.76, "#64727a");
+  surface.addColorStop(1, "#080b0d");
+  ctx.fillStyle = surface;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2);
+  ctx.clip();
+  const reflection = ctx.createLinearGradient(centerX - orbRadius, centerY, centerX + orbRadius, centerY);
+  reflection.addColorStop(0, "rgba(0,0,0,.8)");
+  reflection.addColorStop(.3, "rgba(169,218,226,.17)");
+  reflection.addColorStop(.6, "rgba(0,0,0,.5)");
+  reflection.addColorStop(.83, "rgba(217,186,220,.22)");
+  reflection.addColorStop(1, "rgba(0,0,0,.8)");
+  ctx.fillStyle = reflection;
+  ctx.fillRect(centerX - orbRadius, centerY - orbRadius, orbRadius * 2, orbRadius * 2);
+  ctx.restore();
 }
 
-function drawInfoSphere(ctx, image, centerX, centerY, radius, rotation) {
-  ctx.save();
-  ctx.translate(centerX, centerY);
-  ctx.shadowColor = "rgba(0,0,0,.64)";
-  ctx.shadowBlur = 55;
-  ctx.shadowOffsetY = 24;
-  const base = ctx.createRadialGradient(-radius * .32, -radius * .38, radius * .05, 0, 0, radius);
-  base.addColorStop(0, "rgba(126,111,96,.62)");
-  base.addColorStop(.38, "rgba(55,47,42,.82)");
-  base.addColorStop(.78, "rgba(25,21,19,.94)");
-  base.addColorStop(1, "rgba(8,7,6,.98)");
-  ctx.fillStyle = base;
-  ctx.beginPath();
-  ctx.arc(0, 0, radius, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.shadowColor = "transparent";
-  ctx.clip();
-
-  ctx.globalAlpha = .34;
-  ctx.filter = "grayscale(1) sepia(.5) contrast(2.1) brightness(.72)";
-  const stripWidth = 4;
-  for (let destinationX = -radius; destinationX < radius; destinationX += stripWidth) {
-    const normalizedX = destinationX / radius;
-    const depth = Math.sqrt(Math.max(0, 1 - normalizedX * normalizedX));
-    const longitude = Math.asin(normalizedX) + rotation;
-    const wrapped = ((longitude / (Math.PI * 2)) % 1 + 1) % 1;
-    const sourceX = Math.min(image.naturalWidth - 1, wrapped * image.naturalWidth);
-    const sourceWidth = Math.min(image.naturalWidth - sourceX, Math.max(1, image.naturalWidth / (radius * 2)));
-    ctx.globalAlpha = .12 + depth * .31;
-    ctx.drawImage(image, sourceX, 0, sourceWidth, image.naturalHeight, destinationX, -radius, stripWidth + 1, radius * 2);
+function drawInfoTorus(ctx, centerX, centerY, radius, rotation) {
+  const { vertices, faces } = infoTorusMesh;
+  const projected = new Array(vertices.length);
+  const spinY = rotation;
+  const tiltX = .35 + Math.sin(rotation * .72) * .11;
+  const tiltZ = .13 + Math.sin(rotation * .37) * .09;
+  const cy = Math.cos(spinY), sy = Math.sin(spinY);
+  const cx = Math.cos(tiltX), sx = Math.sin(tiltX);
+  const cz = Math.cos(tiltZ), sz = Math.sin(tiltZ);
+  const scale = radius / 1.63;
+  for (let index = 0; index < vertices.length; index++) {
+    const vertex = vertices[index];
+    const x = vertex.x * cy + vertex.z * sy;
+    const z = vertex.z * cy - vertex.x * sy;
+    const y = vertex.y * cx - z * sx;
+    const depth = vertex.y * sx + z * cx;
+    const perspective = 4.6 / (4.6 - depth);
+    projected[index] = {
+      x: centerX + (x * cz - y * sz) * scale * perspective,
+      y: centerY + (x * sz + y * cz) * scale * perspective,
+      z: depth
+    };
   }
-  ctx.filter = "none";
-
-  ctx.globalAlpha = .18;
-  ctx.strokeStyle = "#c8b9aa";
-  ctx.lineWidth = 1;
-  [-.58,-.28,0,.28,.58].forEach((latitude) => {
-    const latitudeRadius = Math.sqrt(1 - latitude * latitude);
+  for (const face of faces) {
+    face.depth = face.corners.reduce((sum, corner) => sum + projected[corner].z, 0) * .25;
+  }
+  faces.sort((a, b) => a.depth - b.depth);
+  const paintFace = (face) => {
+    const normalX = Math.cos(face.v) * Math.cos(face.u);
+    const normalY = Math.cos(face.v) * Math.sin(face.u);
+    const normalZ = Math.sin(face.v);
+    const rotatedX = normalX * cy + normalZ * sy;
+    const rotatedZ = normalZ * cy - normalX * sy;
+    const rotatedY = normalY * cx - rotatedZ * sx;
+    const facing = normalY * sx + rotatedZ * cx;
+    const diffuse = Math.max(0, -rotatedX * .38 - rotatedY * .48 + facing * .79);
+    const specular = Math.pow(Math.max(0, -rotatedX * .18 - rotatedY * .36 + facing * .92), 18);
+    const rim = Math.pow(1 - Math.abs(facing), 2);
+    const band = Math.pow(.5 + .5 * Math.sin(face.v * 8 + face.u * .7), 8);
+    const phase = face.u * 2.1 + face.v * 1.4;
+    const cyan = Math.max(0, Math.sin(phase));
+    const magenta = Math.max(0, Math.sin(phase + 2.1));
+    const warmth = Math.max(0, Math.sin(phase + 4.2));
+    const chrome = 18 + diffuse * 55 + specular * 142 + rim * 28 + band * 43;
+    const red = Math.min(255, chrome + magenta * (26 + band * 55) + warmth * 23);
+    const green = Math.min(255, chrome + cyan * (34 + band * 54) + warmth * 12);
+    const blue = Math.min(255, chrome + cyan * (45 + band * 57) + magenta * 36);
+    const corners = face.corners.map((corner) => projected[corner]);
+    ctx.fillStyle = `rgb(${red | 0} ${green | 0} ${blue | 0})`;
     ctx.beginPath();
-    ctx.ellipse(0, latitude * radius, radius * latitudeRadius, radius * .16 * latitudeRadius, 0, 0, Math.PI * 2);
+    ctx.moveTo(corners[0].x, corners[0].y);
+    for (let index = 1; index < 4; index++) ctx.lineTo(corners[index].x, corners[index].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.lineWidth = .55;
     ctx.stroke();
-  });
-  [-.62,-.3,0,.3,.62].forEach((longitude) => {
-    ctx.beginPath();
-    ctx.ellipse(0, 0, radius * Math.abs(Math.cos(longitude + rotation)) * .72, radius, 0, 0, Math.PI * 2);
-    ctx.stroke();
-  });
-
-  const shade = ctx.createLinearGradient(-radius, 0, radius, 0);
-  shade.addColorStop(0, "rgba(0,0,0,.86)");
-  shade.addColorStop(.28, "rgba(0,0,0,.16)");
-  shade.addColorStop(.57, "rgba(255,241,219,.06)");
-  shade.addColorStop(1, "rgba(0,0,0,.88)");
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = shade;
-  ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
-  ctx.restore();
-
-  ctx.save();
-  ctx.translate(centerX, centerY);
-  ctx.strokeStyle = "rgba(200,185,170,.22)";
-  ctx.lineWidth = 1.3;
-  ctx.beginPath();
-  ctx.arc(0, 0, radius, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.restore();
+  };
+  let firstFrontFace = faces.findIndex((face) => face.depth >= 0);
+  if (firstFrontFace < 0) firstFrontFace = faces.length;
+  for (let index = 0; index < firstFrontFace; index++) paintFace(faces[index]);
+  drawInfoChromeOrb(ctx, centerX, centerY, radius);
+  for (let index = firstFrontFace; index < faces.length; index++) paintFace(faces[index]);
 }
 
 function drawInfoBackground(time = performance.now()) {
@@ -1545,32 +1594,30 @@ function drawInfoBackground(time = performance.now()) {
     infoBackgroundLastTime = 0;
     return;
   }
-  if (infoBackgroundLastTime && time - infoBackgroundLastTime < 32) {
+  if (infoBackgroundLastTime && time - infoBackgroundLastTime < 40) {
     infoBackgroundFrame = requestAnimationFrame(drawInfoBackground);
     return;
   }
   const delta = infoBackgroundLastTime ? Math.min(48, time - infoBackgroundLastTime) : 33;
   infoBackgroundLastTime = time;
-  infoBackgroundRotation += delta * .00038;
+  if (!reducedMotion.matches) infoBackgroundRotation += delta * .0002;
   const width = innerWidth;
   const height = innerHeight;
   const ctx = infoBackgroundContext;
 
   const gradient = ctx.createRadialGradient(width * .5, height * .5, 0, width * .5, height * .5, Math.max(width, height) * .72);
-  gradient.addColorStop(0, "#28211d");
-  gradient.addColorStop(.46, "#181411");
-  gradient.addColorStop(1, "#0d0b0a");
+  gradient.addColorStop(0, "#1b1b1a");
+  gradient.addColorStop(.5, "#101010");
+  gradient.addColorStop(1, "#070707");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
 
-  if (infoBackgroundImage?.complete && infoBackgroundImage.naturalWidth > 0) {
-    const radius = Math.min(width * .22, height * .32, 310);
-    drawInfoSphere(ctx, infoBackgroundImage, width * .5, height * .5, radius, infoBackgroundRotation);
-  }
+  const radius = Math.min(width * .25, height * .43, 340);
+  drawInfoTorus(ctx, width * .5, height * .45, radius, infoBackgroundRotation);
 
   if (infoBayerPattern) {
     ctx.save();
-    ctx.globalAlpha = .42;
+    ctx.globalAlpha = .23;
     ctx.globalCompositeOperation = "overlay";
     ctx.fillStyle = infoBayerPattern;
     ctx.fillRect(0, 0, width, height);
@@ -1582,7 +1629,6 @@ function drawInfoBackground(time = performance.now()) {
 
 function startInfoBackground() {
   resizeInfoBackground();
-  selectInfoBackgroundIcon();
   cancelAnimationFrame(infoBackgroundFrame);
   infoBackgroundFrame = requestAnimationFrame(drawInfoBackground);
 }
