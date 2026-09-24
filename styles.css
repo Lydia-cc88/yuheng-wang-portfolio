@@ -4642,6 +4642,21 @@ body.info-open #nav-chips .nav-chip {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  opacity: 0;
+}
+#info-object-art {
+  position: fixed;
+  z-index: 0;
+  left: 50%;
+  top: 48%;
+  width: min(56vw, 85vh, 620px);
+  height: auto;
+  max-width: none;
+  pointer-events: none;
+  transform: translate(-50%, -50%) perspective(900px) rotateY(-7deg) rotateX(3deg);
+  filter: brightness(.82) contrast(1.12) saturate(.78) drop-shadow(0 22px 32px rgba(0,0,0,.44));
+  animation: info-object-float 18s ease-in-out infinite alternate;
+  will-change: transform;
 }
 #info-dither {
   position: fixed;
@@ -4790,9 +4805,17 @@ body.info-glitching #info-glitch i:nth-child(even) { animation-delay: 24ms; }
   50% { transform: translate3d(1.25%,-1.5%,0); }
   100% { transform: translate3d(-.5%,.75%,0); }
 }
+@keyframes info-object-float {
+  from { transform: translate(-50%, -49%) perspective(900px) rotateY(-7deg) rotateX(3deg); }
+  to { transform: translate(-50%, -51%) perspective(900px) rotateY(7deg) rotateX(-3deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #info-object-art { animation: none; }
+}
 
 @media (max-width: 760px) {
   #info-inner { width: calc(100% - 44px); padding: 120px 0 64px; }
+  #info-object-art { width: min(90vw, 68vh, 500px); top: 41%; }
   #info-name { font-size: clamp(42px,13vw,68px); line-height: .88; }
   #info-role { margin-top: 20px; font-size: 12px; }
   #info-bio { margin-top: 58px; }

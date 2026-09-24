@@ -469,6 +469,7 @@ const categoryIndex = document.querySelector("#category-index");
 const detail = document.querySelector("#detail");
 const info = document.querySelector("#info");
 const infoBackground = document.querySelector("#info-background");
+const infoObjectArt = document.querySelector("#info-object-art");
 const infoBackgroundContext = infoBackground.getContext("2d", { alpha: false });
 const infoGlitch = document.querySelector("#info-glitch");
 const wipe = document.querySelector("#wipe");
@@ -591,6 +592,16 @@ let infoBackgroundFrame = 0;
 let infoBackgroundLastTime = 0;
 let infoBackgroundRotation = 0;
 let infoBayerPattern = null;
+infoObjectArt.addEventListener("load", () => {
+  cancelAnimationFrame(infoBackgroundFrame);
+  infoBackgroundFrame = 0;
+  infoBackground.style.opacity = "0";
+});
+infoObjectArt.addEventListener("error", () => {
+  infoObjectArt.style.visibility = "hidden";
+  infoBackground.style.opacity = "1";
+  if (info.classList.contains("open")) startInfoBackground();
+});
 let activeSignal = -1;
 let forcedSignal = -1;
 let signalLocked = false;
@@ -1645,6 +1656,11 @@ function drawInfoBackground(time = performance.now()) {
 }
 
 function startInfoBackground() {
+  if (infoObjectArt.complete && infoObjectArt.naturalWidth > 0) {
+    cancelAnimationFrame(infoBackgroundFrame);
+    infoBackgroundFrame = 0;
+    return;
+  }
   resizeInfoBackground();
   cancelAnimationFrame(infoBackgroundFrame);
   infoBackgroundFrame = requestAnimationFrame(drawInfoBackground);
@@ -2690,7 +2706,7 @@ window.addEventListener("keydown", (event) => {
 
 detail.addEventListener("scroll", updateDetailProgress, { passive: true });
 window.addEventListener("resize", () => {
-  if (info.classList.contains("open")) resizeInfoBackground();
+  if (info.classList.contains("open") && !(infoObjectArt.complete && infoObjectArt.naturalWidth > 0)) resizeInfoBackground();
   renderOrbit(orbitIndex);
 });
 window.addEventListener("online", () => document.querySelector("#status-dot").classList.remove("offline"));
