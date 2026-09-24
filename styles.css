@@ -497,6 +497,7 @@ body.overlay-open #identity-name { opacity: .08; }
   box-shadow: none;
   filter: drop-shadow(0 24px 36px rgba(7,17,47,.28));
 }
+#next-object.project-object--home::before { display: none; }
 #next-object.project-object--home .next-icon-fill {
   display: none;
 }
