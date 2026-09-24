@@ -332,7 +332,7 @@ let collectionDrag = null;
 let collectionSuppressClick = 0;
 const collectionCards = [...document.querySelectorAll(".collection-card")];
 const collectionSelector = document.querySelector("#collection-selector");
-collectionSelector.innerHTML = projects.map((p, i) => `<button type="button" data-collection-index="${i}" aria-label="Select ${p.name}"><img src="${p.icon}" alt=""></button>`).join("");
+collectionSelector.innerHTML = projects.map((p, i) => `<button type="button" data-collection-index="${i}" aria-label="Select ${p.name}"><img src="${versionedAsset(collectionIcons[p.id] || p.icon)}" alt="" loading="lazy" decoding="async"></button>`).join("");
 function renderCollection() {
   const radius = Math.max(innerWidth * .72, innerHeight * .8);
   const active = Math.round(collectionPosition);
