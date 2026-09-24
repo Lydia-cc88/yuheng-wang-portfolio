@@ -117,12 +117,6 @@ body:not(.is-booting) #screen-fx { opacity: 0; visibility: hidden; }
 .disc-face i { position: absolute; width: 120%; height: 22%; background: var(--accent); transform: rotate(-19deg); opacity: .7; mix-blend-mode: screen; }
 #enter-btn { position: absolute; bottom: 10vh; min-width: 190px; padding: 12px 18px; border: 1px solid #fff; font: 12px var(--pixel); letter-spacing: .08em; text-transform: uppercase; transition: background 180ms ease, color 180ms ease; }
 #enter-btn:hover { background: var(--accent); color: #070707; }
-#enter-audio { position: absolute; bottom: 5.7vh; color: #aaa; font: 9px var(--pixel); letter-spacing: .08em; text-transform: uppercase; }
-
-.mini-eq { display: inline-flex; width: 10px; height: 10px; align-items: end; gap: 2px; }
-.mini-eq i { display: block; width: 2px; height: 35%; background: currentColor; animation: eq 700ms ease-in-out infinite alternate; }
-.mini-eq i:nth-child(2) { height: 100%; animation-delay: -300ms; }
-#sound-toggle[aria-pressed="true"] .mini-eq i { height: 2px; animation: none; }
 
 #loader { position: fixed; z-index: 80; inset: 0; visibility: hidden; pointer-events: none; }
 #loader.is-active { visibility: visible; }
@@ -152,7 +146,7 @@ body:not(.is-booting) #screen-fx { opacity: 0; visibility: hidden; }
 #status-word { max-width: 0; opacity: 0; overflow: hidden; margin-left: -6px; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; transition: max-width 500ms cubic-bezier(.22,1,.36,1), opacity 300ms ease, margin 500ms ease; }
 #status-pill:hover #status-word,
 #status-pill:focus-visible #status-word { max-width: 70px; margin-left: 0; opacity: 1; }
-#sound-toggle, #theme-toggle { display: flex; align-items: center; gap: 5px; min-height: 28px; }
+#theme-toggle { display: flex; align-items: center; gap: 5px; min-height: 28px; }
 .theme-glyph { width: 12px; font: 15px/1 Georgia, serif; transition: transform 220ms ease; }
 #theme-toggle:hover .theme-glyph { transform: rotate(-18deg); color: var(--accent); }
 #nav-chips { display: flex; align-items: center; gap: 9px; }
@@ -641,7 +635,7 @@ body.overlay-open #identity-name { opacity: .08; }
   #identity-name { left: 14px; right: 14px; top: 49%; width: auto; display: flex; flex-direction: column; align-items: stretch; gap: 28vw; font-size: 20vw; line-height: .72; white-space: normal; transform: translateY(-50%); }
   #identity-name span:first-child { align-self: flex-start; }
   #identity-name span:last-child { align-self: flex-end; }
-  #status-pill, #sound-toggle, #theme-toggle { display: none; }
+  #status-pill, #theme-toggle { display: none; }
   #menu-btn { display: block; }
   #nav-chips { position: fixed; z-index: 51; top: 59px; right: 20px; display: flex; flex-direction: column; align-items: stretch; visibility: hidden; opacity: 0; transform: translateX(15px); transition: opacity 220ms ease, transform 320ms cubic-bezier(.22,1,.36,1), visibility 0s linear 320ms; }
   #nav-chips.open { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
@@ -2989,7 +2983,6 @@ body.orbit-dragging #orbit-track .signal-screen { transition: opacity .16s linea
 #system-status i { display: none; }
 
 #status-pill,
-#sound-toggle,
 #theme-toggle,
 #menu-btn { display: none !important; }
 #nav-chips {
@@ -3713,7 +3706,6 @@ body.field-view.signal-ready #signal-cursor.visible {
 body.field-view.signal-ready #signal-cursor.visible span { opacity: 1; }
 
 body.field-view #status-pill,
-body.field-view #sound-toggle,
 body.field-view #theme-toggle { display: flex !important; }
 body.field-view #menu-btn { display: none !important; }
 body.field-view #nav-chips {
@@ -3766,7 +3758,6 @@ body.signal-enter.field-view #field-core { animation: field-material-resolve .7s
 
 @media (max-width:760px) {
   body.field-view #status-pill,
-  body.field-view #sound-toggle,
   body.field-view #theme-toggle { display: none !important; }
   body.field-view #menu-btn { display: block !important; }
   body.field-view #nav-chips {
@@ -3966,7 +3957,6 @@ body.field-view:not(.overlay-open) #logo,
 body.field-view:not(.overlay-open) #logo span,
 body.field-view:not(.overlay-open) #logo small,
 body.field-view:not(.overlay-open) #status-pill,
-body.field-view:not(.overlay-open) #sound-toggle,
 body.field-view:not(.overlay-open) #theme-toggle,
 body.field-view:not(.overlay-open) #view-mode-toggle,
 body.field-view:not(.overlay-open) #signal-categories,
@@ -4490,19 +4480,19 @@ body.work-open .nav-chip[data-action="work"] { color: #12110f; border-color: var
   z-index: 1;
   left: 0;
   top: 0;
-  width: clamp(250px,28vw,430px);
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  border: 1px solid #f1eee63b;
-  background: #080806;
-  box-shadow: 0 28px 65px #0009;
+  width: clamp(250px,26vw,400px);
+  padding: 10px 10px 12px;
+  border: 1px solid #d8d1c5;
+  background: #f4f0e7;
+  box-shadow: 0 4px 0 #aea79b88, 0 28px 65px #0008;
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity;
   transition: opacity 260ms ease;
 }
-#work-preview.visible { opacity: .88; }
-#work-preview img { width: 100%; height: 100%; display: block; object-fit: cover; filter: saturate(.86) contrast(1.05); }
+#work-preview.visible { opacity: 1; }
+#work-preview img { width: 100%; height: auto; aspect-ratio: 4 / 3; display: block; object-fit: contain; background: #1b2029; filter: none; }
+.work-preview__caption { display: block; padding: 13px 3px 7px; overflow: hidden; color: #242b35; font: 600 10px/1.2 "IBM Plex Mono", monospace; letter-spacing: .12em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 #grid-legend {
   z-index: 4;
   left: 7vw;
@@ -4810,7 +4800,7 @@ body.mono #work-index-head,
 body.mono .grid-row,
 body.mono .grid-row:first-child { border-color: #171d2c2e; }
 body.mono #grid-legend { color: #171d2c; }
-body.mono #work-preview { border-color: #171d2c42; background: #d9d0c3; box-shadow: 0 28px 65px #513d2830; }
+body.mono #work-preview { border-color: #c9c1b3; background: #f4f0e7; box-shadow: 0 4px 0 #bcb3a8, 0 28px 65px #513d2830; }
 
 /* The scroll-down collection also changes temperature with the global theme. */
 body:not(.mono) #work-collection { color: #edf2f7; background: radial-gradient(ellipse at 50% 120%, #263a52 0, transparent 65%), #0b1320; }

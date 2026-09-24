@@ -433,6 +433,7 @@ const loader = document.querySelector("#loader");
 const workGrid = document.querySelector("#work-grid");
 const workPreview = document.querySelector("#work-preview");
 const workPreviewImage = workPreview.querySelector("img");
+const workPreviewCaption = workPreview.querySelector(".work-preview__caption");
 const WORK_PREVIEW_EASE = .11;
 let workPreviewX = innerWidth * .5;
 let workPreviewY = innerHeight * .5;
@@ -452,9 +453,10 @@ function animateWorkPreview() {
 }
 
 function moveWorkPreview(event) {
-  const halfWidth = Math.min(215, innerWidth * .14);
+  const halfWidth = workPreview.offsetWidth * .5;
+  const halfHeight = workPreview.offsetHeight * .5;
   workPreviewTargetX = Math.max(halfWidth + 18, Math.min(innerWidth - halfWidth - 18, event.clientX));
-  workPreviewTargetY = Math.max(125, Math.min(innerHeight - 125, event.clientY));
+  workPreviewTargetY = Math.max(halfHeight + 70, Math.min(innerHeight - halfHeight - 24, event.clientY));
   if (reducedMotion.matches) {
     workPreviewX = workPreviewTargetX;
     workPreviewY = workPreviewTargetY;
@@ -637,8 +639,6 @@ const titleRefractionStates = new WeakMap();
 
 function getRefractionCompanion(title) {
   if (title.id === "detail-title") return document.querySelector("#detail-object");
-  const row = title.closest(".grid-row");
-  if (row) return document.querySelector("#work-preview");
   const card = title.closest(".collection-card");
   return card?.querySelector(".collection-mark") || null;
 }
@@ -2306,6 +2306,7 @@ document.querySelectorAll(".grid-row").forEach((row) => {
   row.addEventListener("pointerenter", (event) => {
     const source = row.querySelector(".grid-row__preview-source").dataset.src;
     if (source && workPreviewImage.getAttribute("src") !== source) workPreviewImage.src = source;
+    workPreviewCaption.textContent = row.querySelector(".grid-row__name").getAttribute("aria-label");
     workPreview.classList.add("visible");
     moveWorkPreview(event);
   });
@@ -2315,15 +2316,10 @@ workGrid.addEventListener("pointermove", (event) => {
   workPreview.classList.toggle("visible", Boolean(row));
   if (row) {
     moveWorkPreview(event);
-    updateTitleRefraction(row.querySelector(".grid-row__name"), event);
-    document.querySelectorAll(".grid-row__name.is-refracting").forEach((title) => {
-      if (title !== row.querySelector(".grid-row__name")) releaseTitleRefraction(title);
-    });
   }
 });
 workGrid.addEventListener("pointerleave", () => {
   workPreview.classList.remove("visible");
-  document.querySelectorAll(".grid-row__name.is-refracting").forEach(releaseTitleRefraction);
 });
 const detailStage = document.querySelector("#detail-stage");
 detailStage.addEventListener("pointermove", (event) => updateTitleRefraction(document.querySelector("#detail-title"), event));
@@ -2415,11 +2411,6 @@ menuButton.addEventListener("click", () => {
   const open = menuButton.getAttribute("aria-expanded") === "true";
   menuButton.setAttribute("aria-expanded", String(!open));
   navChips.classList.toggle("open", !open);
-});
-
-document.querySelector("#sound-toggle").addEventListener("click", (event) => {
-  const pressed = event.currentTarget.getAttribute("aria-pressed") === "true";
-  event.currentTarget.setAttribute("aria-pressed", String(!pressed));
 });
 
 document.querySelector("#theme-toggle").addEventListener("click", (event) => {
