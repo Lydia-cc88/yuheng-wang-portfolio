@@ -4,8 +4,8 @@ const projects = [
   { id: "digital-03", name: "Marx Memorial Library", category: "Digital", type: "Web Design / Visual Identity", year: "2026", words: ["Archive", "Struggle"], bg: "#392722", colors: ["#df4d2d", "#211a18"], icon: "assets/projects/spatial/project-03-icon.png", summary: "A contemporary digital identity and communication system for the Marx Memorial Library. The project connects its historic building, socialist archive and educational mission through a new website, campaign language and public-facing applications.", role: "Visual Identity\nWeb Design\nArt Direction\nCampaign System\nBranding\nDisplay Design\nPoster", credits: "Marx Memorial Library concept project", website: "https://torriki74-eng.github.io/MML-6.0-Website/" },
   { id: "digital-04", name: "MeloTrip", category: "Digital", type: "Web / UI / Service Design", year: "2026", words: ["Memory", "Melody"], bg: "#bfd7e9", colors: ["#f3e45b", "#17345f"], icon: "assets/projects/melotrip/melotrip-orbit.png", summary: "MeloTrip turns journeys into sound-linked memories. It records seven-second fragments, pairs them with images and places, and builds a private listening atlas across mobile and web.", role: "UX Research\nService Design\nUI / Interaction\nWeb Experience\nUser Testing\nVideo Editing\nBranding", credits: "Individual postgraduate project\nExperience prototype", links: [
     { label: "Case Study", title: "Read the MeloTrip case study", url: "https://mining-relax-35841162.figma.site/" },
-    { label: "UI Prototype", title: "Open the interactive prototype", url: "https://mining-relax-35841162.figma.site/" },
-    { label: "Website", title: "Visit the web experience", url: "https://torriki74-eng.github.io/MML-6.0-Website/" }
+    { label: "UI Prototype", title: "Open the interactive prototype", url: "https://www.figma.com/proto/6Oyi8byz58VgORA1xnobXX/MeloTrip-%E2%80%94-Mobile-Product?node-id=33-222&starting-point-node-id=33%3A3", display: "FIGMA.COM / MELOTRIP" },
+    { label: "Website", title: "Visit the web experience", url: "https://lydia-cc88.github.io/Melotrip/index.html", display: "LYDIA-CC88.GITHUB.IO / MELOTRIP" }
   ] },
   { id: "gold-rush", name: "Gold Rush", category: "Transmedia", type: "Interactive Installation", year: "2026", words: ["Fragment", "Memory"], bg: "#b59a61", colors: ["#f1d89a", "#17120b"], icon: "assets/projects/gold-rush/gold-rush-sign-transparent.png", summary: "Gold Rush reimagines archaeological ceramics as a responsive field of particles. Vessels, figures and fragments dissolve and gather again through gesture, turning the act of looking into an encounter with unstable material memory.", role: "Concept & Art Direction\nInteractive Installation\n3D / Particle Visuals\nExperience Design\n3D Rendering\nTouchDesigner", credits: "Independent interactive installation" },
   { id: "welcome-exe", name: "Welcome.exe", category: "Transmedia", type: "Interactive Moving-image Installation", year: "2025", words: ["Algorithm", "Existence"], bg: "#101820", colors: ["#e6a330", "#69e8f6"], icon: "assets/projects/welcome-exe/welcome-exe-icon.png", summary: "Welcome.exe constructs a future society governed by algorithms and attention metrics. Seen through a woman's first-person perspective, the AI-generated film traces her gradual estrangement inside this algorithmic world. The installation operates as a terminal: as viewers approach and participate, they form a closer connection with that future and confront a question — are we increasingly using data to prove that we exist?", role: "Concept & Art Direction\nInteractive Installation\nAI Moving Image\nExperience Design\nVideo Editing\nScriptwriting\nArduino Interaction\nGesture Tracking", credits: "Interactive moving-image installation\nSupervised by Zhang Meng\n200 × 300 cm" },
@@ -25,7 +25,7 @@ const homeReturnProject = Object.freeze({
   type: "Main Index",
   bg: "#ff087d",
   colors: ["#d7ff00", "#07112f"],
-  icon: "assets/projects/shoots/shoots-end-ring.png"
+  icon: "static-media/home-return-arrow.png"
 });
 
 const categoryTransitionIcons = [
@@ -1103,6 +1103,7 @@ function transitionCategoryTo(index, direction = 1) {
   window.clearTimeout(categoryTransitionTimer);
   categoryTransition.classList.remove("active");
   categoryTransition.dataset.direction = direction >= 0 ? "next" : "previous";
+  categoryTransition.dataset.category = nextModule.id;
   categoryTransition.style.setProperty("--transition-bg", "#b97b91");
   categoryTransition.style.setProperty("--transition-accent", "#ece9e2");
   categoryTransition.style.setProperty("--transition-ink", "#101a34");
@@ -1773,7 +1774,7 @@ function renderProjectMedia(project) {
     <a class="project-website-link project-website-link--${index + 1}" href="${link.url}" target="_blank" rel="noopener noreferrer" aria-label="${link.title}">
       <span>${link.label}</span>
       <strong>${link.title}</strong>
-      <em>${link.url.replace(/^https?:\/\//, "").replace(/\/$/, "")} ↗</em>
+      <em>${link.display || link.url.replace(/^https?:\/\//, "").replace(/\/$/, "")} ↗</em>
     </a>`).join("");
   observeProjectMedia();
 }
