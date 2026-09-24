@@ -1462,8 +1462,8 @@ function resizeInfoBackground() {
 }
 
 const infoTorusMesh = (() => {
-  const longitudinal = 88;
-  const radial = 24;
+  const longitudinal = 96;
+  const radial = 32;
   const vertices = [];
   const faces = [];
   for (let ring = 0; ring <= longitudinal; ring++) {
@@ -1490,7 +1490,7 @@ const infoTorusMesh = (() => {
       });
     }
   }
-  return { vertices, faces };
+  return { vertices, faces, longitudinal, radial };
 })();
 
 function drawInfoChromeOrb(ctx, centerX, centerY, radius) {
@@ -1499,10 +1499,10 @@ function drawInfoChromeOrb(ctx, centerX, centerY, radius) {
     centerX - orbRadius * .33, centerY - orbRadius * .42, orbRadius * .04,
     centerX, centerY, orbRadius
   );
-  surface.addColorStop(0, "#9fa9ae");
-  surface.addColorStop(.23, "#414d55");
-  surface.addColorStop(.54, "#1a252b");
-  surface.addColorStop(.76, "#64727a");
+  surface.addColorStop(0, "#77858b");
+  surface.addColorStop(.23, "#303d44");
+  surface.addColorStop(.54, "#131e23");
+  surface.addColorStop(.76, "#405057");
   surface.addColorStop(1, "#080b0d");
   ctx.fillStyle = surface;
   ctx.beginPath();
@@ -1524,7 +1524,7 @@ function drawInfoChromeOrb(ctx, centerX, centerY, radius) {
 }
 
 function drawInfoTorus(ctx, centerX, centerY, radius, rotation) {
-  const { vertices, faces } = infoTorusMesh;
+  const { vertices, faces, longitudinal, radial } = infoTorusMesh;
   const projected = new Array(vertices.length);
   const spinY = rotation;
   const tiltX = .35 + Math.sin(rotation * .72) * .11;
@@ -1559,17 +1559,17 @@ function drawInfoTorus(ctx, centerX, centerY, radius, rotation) {
     const rotatedY = normalY * cx - rotatedZ * sx;
     const facing = normalY * sx + rotatedZ * cx;
     const diffuse = Math.max(0, -rotatedX * .38 - rotatedY * .48 + facing * .79);
-    const specular = Math.pow(Math.max(0, -rotatedX * .18 - rotatedY * .36 + facing * .92), 18);
+    const specular = Math.pow(Math.max(0, -rotatedX * .18 - rotatedY * .36 + facing * .92), 34);
     const rim = Math.pow(1 - Math.abs(facing), 2);
-    const band = Math.pow(.5 + .5 * Math.sin(face.v * 8 + face.u * .7), 8);
+    const band = Math.pow(.5 + .5 * Math.sin(face.v * 8 + face.u * .7), 13);
     const phase = face.u * 2.1 + face.v * 1.4;
     const cyan = Math.max(0, Math.sin(phase));
     const magenta = Math.max(0, Math.sin(phase + 2.1));
     const warmth = Math.max(0, Math.sin(phase + 4.2));
-    const chrome = 18 + diffuse * 55 + specular * 142 + rim * 28 + band * 43;
-    const red = Math.min(255, chrome + magenta * (26 + band * 55) + warmth * 23);
-    const green = Math.min(255, chrome + cyan * (34 + band * 54) + warmth * 12);
-    const blue = Math.min(255, chrome + cyan * (45 + band * 57) + magenta * 36);
+    const chrome = 12 + diffuse * 30 + specular * 125 + rim * 22 + band * 19;
+    const red = Math.min(255, chrome + magenta * (14 + band * 34) + warmth * 14);
+    const green = Math.min(255, chrome + cyan * (19 + band * 36) + warmth * 8);
+    const blue = Math.min(255, chrome + cyan * (27 + band * 40) + magenta * 23);
     const corners = face.corners.map((corner) => projected[corner]);
     ctx.fillStyle = `rgb(${red | 0} ${green | 0} ${blue | 0})`;
     ctx.beginPath();
@@ -1586,6 +1586,23 @@ function drawInfoTorus(ctx, centerX, centerY, radius, rotation) {
   for (let index = 0; index < firstFrontFace; index++) paintFace(faces[index]);
   drawInfoChromeOrb(ctx, centerX, centerY, radius);
   for (let index = firstFrontFace; index < faces.length; index++) paintFace(faces[index]);
+  ctx.save();
+  ctx.globalAlpha = .35;
+  ctx.lineWidth = .85;
+  for (let segment = 1; segment < radial; segment += 2) {
+    ctx.strokeStyle = segment % 4 === 1 ? "#b4e9eb" : "#d7a9cf";
+    ctx.beginPath();
+    let drawing = false;
+    for (let ring = 0; ring <= longitudinal; ring++) {
+      const point = projected[ring * (radial + 1) + segment];
+      if (point.z < .06) { drawing = false; continue; }
+      if (drawing) ctx.lineTo(point.x, point.y);
+      else ctx.moveTo(point.x, point.y);
+      drawing = true;
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function drawInfoBackground(time = performance.now()) {
