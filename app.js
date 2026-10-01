@@ -2403,6 +2403,9 @@ workGrid.addEventListener("pointerleave", () => {
 const detailStage = document.querySelector("#detail-stage");
 detailStage.addEventListener("pointermove", (event) => updateTitleRefraction(document.querySelector("#detail-title"), event));
 detailStage.addEventListener("pointerleave", () => releaseTitleRefraction(document.querySelector("#detail-title")));
+// A fresh visit always begins at the entry screen, even from an old project URL.
+// In-session project navigation and browser back/forward still use the hash router.
+if (location.hash) history.replaceState(null, "", `${location.pathname}${location.search}`);
 initSignalIntro();
 
 signalScreens.forEach((screen,index) => {
@@ -2714,4 +2717,3 @@ window.addEventListener("offline", () => document.querySelector("#status-dot").c
 window.addEventListener("popstate", handleHash);
 
 if (!navigator.onLine) document.querySelector("#status-dot").classList.add("offline");
-if (location.hash) handleHash();
